@@ -11,6 +11,12 @@ namespace here_webapi.Contracts.V1
         public const string Version = "v1";
         public const string Base = Root + "/" + Version;
 
+        public static class Identity
+        {
+            public const string Login = Base + "/identity/login";
+            public const string Register = Base + "/identity/register";
+        }
+
         public static class Universiteler
         {
             public const string GetAll = Base + "/universiteler";

@@ -8,10 +8,12 @@ using Microsoft.EntityFrameworkCore;
 using here_webapi.Data;
 using here_webapi.Models.Kurumlar;
 using here_webapi.Contracts.V1;
+using Microsoft.AspNetCore.Authorization;
 
-namespace here_webapi.Controllers.V1
+namespace here_webapi.Controllers.V1.Kurumlar
 {
     [ApiController]
+    [Authorize]
     public class UniversitelerController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -38,12 +40,5 @@ namespace here_webapi.Controllers.V1
             return uni;
         }
 
-        [HttpPost()]
-        public async Task<ActionResult<Universite>> Create(Universite universite)
-        {
-
-
-            return CreatedAtAction(nameof(Get), new { id = universite.Id }, universite);
-        }
     }
 }

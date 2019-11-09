@@ -1,6 +1,6 @@
-﻿using here_webapi.Models.DersModeller;
-using here_webapi.Models.Identity;
+﻿using here_webapi.Models.Identity;
 using here_webapi.Models.Kurumlar;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,22 +9,24 @@ using System.Threading.Tasks;
 
 namespace here_webapi.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext
+        <
+            AppUser,
+            AppRole,
+            int,
+            AppUserClaim,
+            AppUserRole,
+            AppUserLogin,
+            AppRoleClaim,
+            AppUserToken
+        >
     {
         #region KurumModelleri
         public DbSet<Universite> Universiteler { get; set; }
         public DbSet<Fakulte> Fakulteler { get; set; }
         public DbSet<Bolum> Bolumler { get; set; }
         #endregion
-
-        #region IdentityModelleri
-        public DbSet<AppUser> Users { get; set; }
-        #endregion
-
-        #region DersModelleri
-        public DbSet<Ders> Dersler { get; set; }
-        #endregion
-
+        
         public AppDbContext(DbContextOptions options) : base(options)
         {
         }
@@ -46,24 +48,75 @@ namespace here_webapi.Data
             #endregion
 
             #region IdentityAyarlari
-            modelBuilder.Entity<AppUser>(u =>
+            modelBuilder.Entity<AppUser>(b =>
             {
-                u.HasMany(x => x.VerilenDersler).WithOne(d => d.Ogretmen).HasForeignKey(w => w.OgretmenId);
-                u.HasMany(x => x.AlinanDersler).WithOne(d => d.Ogrenci).HasForeignKey(o => o.OgrenciId);
-            });
-            #endregion
+                b.HasMany(e => e.Claims)
+                    .WithOne()
+                    .HasForeignKey(uc => uc.UserId)
+                    .IsRequired();
 
-            #region DersModelAyarlari
+                b.HasMany(e => e.Logins)
+                    .WithOne()
+                    .HasForeignKey(ul => ul.UserId)
+                    .IsRequired();
 
-            modelBuilder.Entity<Ders>(d => 
-            {
-                d.HasOne(x => x.Ogretmen).WithMany(o => o.VerilenDersler).HasForeignKey(y => y.OgretmenId);
-                d.HasMany(x => x.DersiAlanlar).WithOne(a => a.Ders).HasForeignKey(e => e.DersId);
+                b.HasMany(e => e.Tokens)
+                    .WithOne()
+                    .HasForeignKey(ut => ut.UserId)
+                    .IsRequired();
+
+                b.HasMany(e => e.UserRoles)
+                    .WithOne(e => e.User)
+                    .HasForeignKey(ur => ur.UserId)
+                    .IsRequired().OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<AlinanDersler>(d =>
+
+            modelBuilder.Entity<AppRole>(b =>
             {
-                d.HasOne(x => x.Ogrenci).WithMany(o => o.AlinanDersler).HasForeignKey(x => x.OgrenciId);
-                d.HasOne(x => x.Ders).WithMany(w => w.DersiAlanlar).HasForeignKey(x => x.DersId);
+                b.HasMany(e => e.UserRoles)
+                    .WithOne(e => e.Role)
+                    .HasForeignKey(ur => ur.RoleId)
+                    .IsRequired();
+
+                b.HasMany(e => e.RoleClaims)
+                    .WithOne(e => e.Role)
+                    .HasForeignKey(rc => rc.RoleId)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity<AppUser>(b =>
+            {
+                b.ToTable("identity_users");
+            });
+
+            modelBuilder.Entity<AppUserClaim>(b =>
+            {
+                b.ToTable("identity_userclaims");
+            });
+
+            modelBuilder.Entity<AppUserLogin>(b =>
+            {
+                b.ToTable("identity_userlogins");
+            });
+
+            modelBuilder.Entity<AppUserToken>(b =>
+            {
+                b.ToTable("identity_usertokens");
+            });
+
+            modelBuilder.Entity<AppRole>(b =>
+            {
+                b.ToTable("identity_roles");
+            });
+
+            modelBuilder.Entity<AppRoleClaim>(b =>
+            {
+                b.ToTable("identity_roleclaims");
+            });
+
+            modelBuilder.Entity<AppUserRole>(b =>
+            {
+                b.ToTable("identity_userroles");
             });
             #endregion
 

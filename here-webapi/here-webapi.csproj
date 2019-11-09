@@ -19,6 +19,8 @@
     <Compile Remove="Migrations\20191109142235_UserDersVs.Designer.cs" />
     <Compile Remove="Migrations\20191109142532_UserDersVs.cs" />
     <Compile Remove="Migrations\20191109142532_UserDersVs.Designer.cs" />
+    <Compile Remove="Migrations\20191109212351_UserManaging.cs" />
+    <Compile Remove="Migrations\20191109212351_UserManaging.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
