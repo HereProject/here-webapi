@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using here_webapi.Data;
 using here_webapi.Models.Kurumlar;
 
-namespace here_webapi.Controllers
+namespace here_webapi.Controllers.V1
 {
     [Route("api/[controller]")]
     [ApiController]
