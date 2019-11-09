@@ -7,8 +7,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20191109130519_Initial.cs" />
+    <Compile Remove="Migrations\20191109130519_Initial.Designer.cs" />
+    <Compile Remove="Migrations\20191109141042_UserDersVs.cs" />
+    <Compile Remove="Migrations\20191109141042_UserDersVs.Designer.cs" />
+    <Compile Remove="Migrations\20191109141506_UserDersVs.cs" />
+    <Compile Remove="Migrations\20191109141506_UserDersVs.Designer.cs" />
+    <Compile Remove="Migrations\20191109142030_UserDersVs.cs" />
+    <Compile Remove="Migrations\20191109142030_UserDersVs.Designer.cs" />
+    <Compile Remove="Migrations\20191109142235_UserDersVs.cs" />
+    <Compile Remove="Migrations\20191109142235_UserDersVs.Designer.cs" />
+    <Compile Remove="Migrations\20191109142532_UserDersVs.cs" />
+    <Compile Remove="Migrations\20191109142532_UserDersVs.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.6" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.4" />
   </ItemGroup>
 
 </Project>
