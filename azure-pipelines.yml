@@ -9,11 +9,18 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
   
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- script: dotnet build --configuration $(buildConfiguration)
+  displayName: 'dotnet build $(buildConfiguration)'
+
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
     publishWebProjects: true
-    arguments: '-c Release -o output -r "win-x64" --self-contained'
+    arguments: '--self-contained -c Release -o output -r "win-x64"'
     zipAfterPublish: false
 - task: CopyFiles@1
   inputs:
