@@ -1,27 +1,24 @@
-dependencies:
-    pre:
-        - curl https://packages.microsoft.com/keys/microsoft.asc |gpg --dearmor > microsoft.gpg
-        - sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
-        - sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-trusty-prod trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
-        - sudo apt-get update
-        - sudo apt-get install dotnet-sdk-2.2.402
-    override:
-        - dotnet restore
-test:
-    pre:
-        - dotnet --version
-        - dotnet build ./here-webapi.sln
-        
-# version: 2.0
-# jobs:
-    # build:
-    # docker:
-        # - image: mcr.microsoft.com/dotnet/core/sdk:2.2
-    # steps:
-        # - checkout
-        # - run:
-            # name: Restore Packs
-            # command: dotnet restore
-        # - run:
-            # name: Build API
-            # command: dotnet build -c Release
+version: 2.1
+orbs:
+    win: circleci/windows@1.0.0
+jobs:
+    build:
+        executor:
+            name: win/vs2019
+            shell: powershell.executor
+           
+        steps:
+            - checkout
+            - restore_cache:
+                keys:
+            - run:
+                name: Restore Packages
+                command: dotnet.exe restore
+            - save_cache:
+                paths:
+                    - C:\Users\circleci\.nuget\packages
+            - run:
+                name: Release & Publish API
+                command: dotnet.exe publish  -c "Release" -r win10-x64
+            - store_artifacts:
+                path: .\bin\Release\netcoreapp2.2\win10-x64\publish\here-webapi.dll
