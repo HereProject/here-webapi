@@ -11,6 +11,3 @@ jobs:
         - run:
             name: Build API
             command: dotnet build -c Release
-        - run:
-            name: Run API
-            command: dotnet run
