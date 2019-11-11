@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using here_webapi.Contracts.V1.Responses.Identity;
+using here_webapi.Data;
 using here_webapi.Models.Identity;
 using here_webapi.Options;
 using Microsoft.AspNetCore.Identity;
@@ -15,10 +16,12 @@ namespace here_webapi.Services
 {
     public class IdentityService : IIdentityService
     {
+        private readonly AppDbContext _context;
         private readonly UserManager<AppUser> _userManager;
         private readonly JwtSettings _jwtSettings;
-        public IdentityService(UserManager<AppUser> userManager, JwtSettings jwtSettings)
+        public IdentityService(AppDbContext context, UserManager<AppUser> userManager, JwtSettings jwtSettings)
         {
+            _context = context;
             _userManager = userManager;
             _jwtSettings = jwtSettings;
         }
@@ -27,12 +30,12 @@ namespace here_webapi.Services
         {
             AppUser user = await _userManager.FindByEmailAsync(email);
 
-            if(user == null)
+            if (user == null)
             {
                 return new AuthenticationResponse()
                 {
                     Success = false,
-                    ErrorMessages = new string[] { "Kullanıcı kayıtlı değil." }
+                    Errors = new string[] { "Kullanıcı kayıtlı değil." }
                 };
             }
 
@@ -43,33 +46,53 @@ namespace here_webapi.Services
                 return new AuthenticationResponse()
                 {
                     Success = false,
-                    ErrorMessages = new string[] { "Eposta adresi ile şifre uyuşmuyor." }
+                    Errors = new string[] { "Eposta adresi ile şifre uyuşmuyor." }
                 };
             }
 
             return GenerateTokenForUsers(user);
         }
 
-        public async Task<AuthenticationResponse> RegisterAsync(string email, string password)
+        public async Task<AuthenticationResponse> RegisterAsync(string email, string password, UserType userType, int? uniId = null, int? fakId = null, int? bolId = null)
         {
-            if((await _userManager.FindByEmailAsync(email)) != null)
+            if ((await _userManager.FindByEmailAsync(email)) != null)
             {
                 return new AuthenticationResponse()
                 {
                     Success = false,
-                    ErrorMessages = new string[] { "Eposta adresi sistemde kayıtlı" },
+                    Errors = new string[] { "Eposta adresi sistemde kayıtlı" },
                 };
             }
+
+            if (userType != UserType.Admin && (uniId == null || fakId == null || bolId == null))
+            {
+                return new AuthenticationResponse()
+                {
+                    Success = false,
+                    Errors = new string[] { "Kurum tanımlaması yanlış!" },
+                };
+            }
+
             AppUser tempUser = new AppUser(email);
             tempUser.Email = tempUser.UserName;
+
+            tempUser.UniversiteId = uniId;
+            tempUser.FakulteId = fakId;
+            tempUser.BolumId = bolId;
+            tempUser.UserType = userType;
+
             IdentityResult newUser = await _userManager.CreateAsync(tempUser, password);
 
             if (!newUser.Succeeded)
             {
+
+                _context.UserRoles.Add(new AppUserRole() { UserId = tempUser.Id, RoleId = ((int)userType + 1) });
+                await _context.SaveChangesAsync();
+
                 return new AuthenticationResponse()
                 {
                     Success = false,
-                    ErrorMessages = newUser.Errors.Select(x => x.Description)
+                    Errors = newUser.Errors.Select(x => x.Description)
                 };
             }
 
@@ -82,7 +105,7 @@ namespace here_webapi.Services
             byte[] key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new System.Security.Claims.ClaimsIdentity(new[]
+                Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(JwtRegisteredClaimNames.Sub, user.Email),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),

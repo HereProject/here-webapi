@@ -6,6 +6,7 @@ using here_webapi.Contracts.V1;
 using here_webapi.Contracts.V1.Requests;
 using here_webapi.Contracts.V1.Requests.Identity;
 using here_webapi.Contracts.V1.Responses.Identity;
+using here_webapi.Models.Identity;
 using here_webapi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,11 +30,11 @@ namespace here_webapi.Controllers.V1
             {
                 return BadRequest(new AuthenticationResponse()
                 {
-                    ErrorMessages = ModelState.Values.SelectMany(x => x.Errors).Select(e => e.ErrorMessage)
+                    Errors = ModelState.Values.SelectMany(x => x.Errors).Select(e => e.ErrorMessage)
                 });
             }
 
-            AuthenticationResponse authResponse = await _identityService.RegisterAsync(request.Email, request.Password);
+            AuthenticationResponse authResponse = await _identityService.RegisterAsync(request.Email, request.Password, UserType.Admin);
 
             if (!authResponse.Success)
             {
@@ -53,7 +54,7 @@ namespace here_webapi.Controllers.V1
             {
                 return BadRequest(new AuthenticationResponse()
                 {
-                    ErrorMessages = ModelState.Values.SelectMany(x => x.Errors).Select(e => e.ErrorMessage)
+                    Errors = ModelState.Values.SelectMany(x => x.Errors).Select(e => e.ErrorMessage)
                 });
             }
 

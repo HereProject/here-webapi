@@ -14,8 +14,10 @@ namespace here_webapi.Models.Identity
 
     public enum UserType : byte
     {
-        Ogrenci,
-        Ogretmen
+        Admin = 0,
+        Yonetici = 1,
+        Ogretmen = 2,
+        Ogrenci = 3
     }
 
     public class AppUser : IdentityUser<int>
@@ -42,13 +44,13 @@ namespace here_webapi.Models.Identity
         }
 
 
-        public int UniversiteId { get; set; }
+        public int? UniversiteId { get; set; }
         public Universite Universite { get; set; }
 
-        public int FakulteId { get; set; }
+        public int? FakulteId { get; set; }
         public Fakulte Fakulte { get; set; }
 
-        public int BolumId { get; set; }
+        public int? BolumId { get; set; }
         public Bolum Bolum { get; set; }
 
         // Eğer Öğretmen İse

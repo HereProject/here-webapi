@@ -113,7 +113,43 @@ namespace here_webapi.Data
                     .HasForeignKey(rc => rc.RoleId)
                     .IsRequired();
             });
-                        
+
+            #region tableNames
+            modelBuilder.Entity<AppUser>(b =>
+            {
+                b.ToTable("identity_users");
+            });
+
+            modelBuilder.Entity<AppUserClaim>(b =>
+            {
+                b.ToTable("identity_userclaims");
+            });
+
+            modelBuilder.Entity<AppUserLogin>(b =>
+            {
+                b.ToTable("identity_userlogins");
+            });
+
+            modelBuilder.Entity<AppUserToken>(b =>
+            {
+                b.ToTable("identity_usertokens");
+            });
+
+            modelBuilder.Entity<AppRole>(b =>
+            {
+                b.ToTable("identity_roles");
+            });
+
+            modelBuilder.Entity<AppRoleClaim>(b =>
+            {
+                b.ToTable("identity_roleclaims");
+            });
+
+            modelBuilder.Entity<AppUserRole>(b =>
+            {
+                b.ToTable("identity_userroles");
+            });
+            #endregion
             #endregion
 
             #region DersModelAyarlari

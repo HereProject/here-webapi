@@ -17,6 +17,12 @@ namespace here_webapi.Contracts.V1
             public const string Register = Base + "/identity/register";
         }
 
+        public static class Roles
+        {
+            public const string CreateRole = Base + "/roles/createrole";
+            public const string UserToRole = Base + "/roles/usertorole";
+        }
+
         public static class Universiteler
         {
             public const string GetAll = Base + "/universiteler";

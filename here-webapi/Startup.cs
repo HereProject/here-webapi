@@ -40,7 +40,10 @@ namespace here_webapi
                 options.UseSqlServer(
                     Configuration.GetConnectionString("AmazonConnection")));
 
-            services.AddDefaultIdentity<AppUser>().AddEntityFrameworkStores<AppDbContext>();
+            services.AddIdentity<AppUser, AppRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+            }).AddDefaultTokenProviders().AddEntityFrameworkStores<AppDbContext>();
 
             services.AddMvc().AddJsonOptions(opt => 
             {
