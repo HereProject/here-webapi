@@ -21,6 +21,14 @@
     <Compile Remove="Migrations\20191109142532_UserDersVs.Designer.cs" />
     <Compile Remove="Migrations\20191109212351_UserManaging.cs" />
     <Compile Remove="Migrations\20191109212351_UserManaging.Designer.cs" />
+    <Compile Remove="Migrations\20191110164303_Ders.cs" />
+    <Compile Remove="Migrations\20191110164303_Ders.Designer.cs" />
+    <Compile Remove="Migrations\20191110170551_Ders.cs" />
+    <Compile Remove="Migrations\20191110170551_Ders.Designer.cs" />
+    <Compile Remove="Migrations\20191110170938_Ders.cs" />
+    <Compile Remove="Migrations\20191110170938_Ders.Designer.cs" />
+    <Compile Remove="Migrations\20191111180328_ders.cs" />
+    <Compile Remove="Migrations\20191111180328_ders.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

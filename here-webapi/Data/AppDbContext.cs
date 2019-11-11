@@ -1,4 +1,5 @@
-﻿using here_webapi.Models.Identity;
+﻿using here_webapi.Models.DersModels;
+using here_webapi.Models.Identity;
 using here_webapi.Models.Kurumlar;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +22,22 @@ namespace here_webapi.Data
             AppUserToken
         >
     {
+        #region UserDetails
+        public DbSet<OgrenciDetay> OgrenciDetaylari { get; set; }
+        public DbSet<OgretmenDetay> OgretmenDetaylari { get; set; }
+        #endregion
+
         #region KurumModelleri
         public DbSet<Universite> Universiteler { get; set; }
         public DbSet<Fakulte> Fakulteler { get; set; }
         public DbSet<Bolum> Bolumler { get; set; }
         #endregion
-        
+
+        #region DersModelleri
+        public DbSet<Ders> Dersler { get; set; }
+        public DbSet<AlinanDers> AlinanDersler { get; set; }
+        #endregion
+
         public AppDbContext(DbContextOptions options) : base(options)
         {
         }
@@ -37,19 +48,38 @@ namespace here_webapi.Data
 
             modelBuilder.Entity<Universite>(u =>
             {
-                u.HasMany(x => x.Fakulteler).WithOne(f => f.Universite);
+                u.HasMany(x => x.Fakulteler).WithOne(f => f.Universite).HasForeignKey(z => z.UniversiteId);
+                u.HasMany(x => x.Kisiler).WithOne(f => f.Universite).HasForeignKey(uF => uF.UniversiteId);
             });
 
             modelBuilder.Entity<Fakulte>(u =>
             {
-                u.HasMany(x => x.Bolumler).WithOne(f => f.Fakulte);
+                u.HasMany(x => x.Bolumler).WithOne(f => f.Fakulte).HasForeignKey(z => z.FakulteId);
+                u.HasMany(x => x.Kisiler).WithOne(f => f.Fakulte).HasForeignKey(uF => uF.FakulteId);
             });
 
+            modelBuilder.Entity<Bolum>(u =>
+            {
+                u.HasMany(x => x.Kisiler).WithOne(f => f.Bolum).HasForeignKey(uF => uF.BolumId);
+                u.HasMany(x => x.Dersler).WithOne(f => f.Bolum).HasForeignKey(uF => uF.BolumId);
+            });
             #endregion
 
             #region IdentityAyarlari
             modelBuilder.Entity<AppUser>(b =>
             {
+                b.Property(x => x.UserType).HasDefaultValue(UserType.Ogrenci);
+
+                b.HasOne(x => x.OgrenciDetay).WithOne(y => y.User).HasForeignKey<OgrenciDetay>(oD => oD.UserId).OnDelete(DeleteBehavior.Cascade);
+                b.HasMany(x => x.AlinanDersler).WithOne(y => y.Ogrenci).HasForeignKey(xy => xy.OgrenciId).OnDelete(DeleteBehavior.Restrict);
+                
+                b.HasOne(x => x.OgretmenDetay).WithOne(y => y.User).HasForeignKey<OgretmenDetay>(oD => oD.UserId).OnDelete(DeleteBehavior.Cascade);
+                b.HasMany(x => x.VerilenDersler).WithOne(y => y.Ogretmen).HasForeignKey(xy => xy.OgretmenId).OnDelete(DeleteBehavior.Restrict);
+
+                b.HasOne(x => x.Bolum).WithMany(x => x.Kisiler).HasForeignKey(x => x.BolumId).OnDelete(DeleteBehavior.Restrict);
+                b.HasOne(x => x.Fakulte).WithMany(x => x.Kisiler).HasForeignKey(x => x.FakulteId).OnDelete(DeleteBehavior.Restrict);
+                b.HasOne(x => x.Universite).WithMany(x => x.Kisiler).HasForeignKey(x => x.UniversiteId).OnDelete(DeleteBehavior.Restrict);
+
                 b.HasMany(e => e.Claims)
                     .WithOne()
                     .HasForeignKey(uc => uc.UserId)
@@ -84,6 +114,7 @@ namespace here_webapi.Data
                     .IsRequired();
             });
 
+            #region tableNames
             modelBuilder.Entity<AppUser>(b =>
             {
                 b.ToTable("identity_users");
@@ -118,6 +149,11 @@ namespace here_webapi.Data
             {
                 b.ToTable("identity_userroles");
             });
+            #endregion
+            #endregion
+
+            #region DersModelAyarlari
+
             #endregion
 
             base.OnModelCreating(modelBuilder);

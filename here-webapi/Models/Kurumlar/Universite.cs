@@ -1,4 +1,5 @@
 ﻿using here_webapi.Models._Defs;
+using here_webapi.Models.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,5 +16,7 @@ namespace here_webapi.Models.Kurumlar
 
         public List<Fakulte> Fakulteler { get; set; }
 
+
+        public List<AppUser> Kisiler { get; set; }
     }
 }
