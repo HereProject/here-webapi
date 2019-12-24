@@ -1,6 +1,7 @@
 ﻿using here_webapi.Models.DersModels;
 using here_webapi.Models.Identity;
 using here_webapi.Models.Kurumlar;
+using here_webapi.Models.Yoklama;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -36,6 +37,8 @@ namespace here_webapi.Data
         #region DersModelleri
         public DbSet<Ders> Dersler { get; set; }
         public DbSet<AlinanDers> AlinanDersler { get; set; }
+        public DbSet<AcilanDers> AcilanDersler { get; set; }
+        public DbSet<YoklananOgrenci> YoklananOgrenciler { get; set; }
         #endregion
 
         public AppDbContext(DbContextOptions options) : base(options)

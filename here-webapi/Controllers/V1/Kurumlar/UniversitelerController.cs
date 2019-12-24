@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace here_webapi.Controllers.V1.Kurumlar
 {
     [ApiController]
-    [Authorize]
     public class UniversitelerController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -40,5 +39,21 @@ namespace here_webapi.Controllers.V1.Kurumlar
             return uni;
         }
 
+        [HttpPost(ApiRoute.Universiteler.Create)]
+        [Authorize]
+        public async Task<ActionResult<Universite>> AddUniversity(string UniName)
+        {
+            if (UniName == null)
+                return BadRequest();
+
+            Universite uni = await _context.Universiteler.FirstOrDefaultAsync(x => x.Ad == UniName);
+            if (uni != null)
+                return uni;
+
+            Universite newUni = new Universite() { Ad = UniName };
+            _context.Universiteler.Add(newUni);
+            await _context.SaveChangesAsync();
+            return newUni;
+        }
     }
 }

@@ -21,14 +21,7 @@ namespace here_webapi.Controllers.V1.Kurumlar
             _context = context;
         }
 
-        // GET: api/Bolumler
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Bolum>>> GetBolumler()
-        {
-            return await _context.Bolumler.ToListAsync();
-        }
 
-        // GET: api/Bolumler/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Bolum>> GetBolum(int id)
         {
@@ -42,65 +35,32 @@ namespace here_webapi.Controllers.V1.Kurumlar
             return bolum;
         }
 
-        // PUT: api/Bolumler/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutBolum(int id, Bolum bolum)
-        {
-            if (id != bolum.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(bolum).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BolumExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Bolumler
         [HttpPost]
-        public async Task<ActionResult<Bolum>> PostBolum(Bolum bolum)
+        public async Task<ActionResult<Bolum>> PostBolum(string BolumAd, int FakulteId)
         {
-            _context.Bolumler.Add(bolum);
-            await _context.SaveChangesAsync();
+            if (FakulteId <= 0 || BolumAd == null)
+                return BadRequest();
 
-            return CreatedAtAction("GetBolum", new { id = bolum.Id }, bolum);
-        }
+            Fakulte fak = await _context.Fakulteler.Include(x => x.Bolumler)
+                                                   .FirstOrDefaultAsync(x => x.Id == FakulteId);
 
-        // DELETE: api/Bolumler/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Bolum>> DeleteBolum(int id)
-        {
-            var bolum = await _context.Bolumler.FindAsync(id);
-            if (bolum == null)
+            if (fak == null)
+                return BadRequest();
+
+            if (fak.Bolumler.Any(x => x.Ad == BolumAd))
+                return fak.Bolumler.FirstOrDefault(x => x.Ad == BolumAd);
+            Bolum newBol = new Bolum()
             {
-                return NotFound();
-            }
+                FakulteId = fak.Id,
+                Ad = BolumAd
+            };
+            _context.Bolumler.Add(newBol);
 
-            _context.Bolumler.Remove(bolum);
             await _context.SaveChangesAsync();
 
-            return bolum;
+
+            return CreatedAtAction("GetBolum", new { id = newBol.Id }, newBol);
         }
 
-        private bool BolumExists(int id)
-        {
-            return _context.Bolumler.Any(e => e.Id == id);
-        }
     }
 }

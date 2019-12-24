@@ -47,27 +47,20 @@ namespace here_webapi.Controllers.V1.Kurumlar
 
         // POST: api/Fakulteler
         [HttpPost]
-        public async Task<ActionResult<Fakulte>> PostFakulte(Fakulte fakulte)
+        public async Task<ActionResult<Fakulte>> PostFakulte(string FakulteAd, int UniversiteId)
         {
-
-            if (!ModelState.IsValid)
+            if (FakulteAd == null || UniversiteId <= 0)
                 return BadRequest();
 
-            if (fakulte.UniversiteId <= 0)
+            if (!_context.Universiteler.Any(xa => xa.Id == UniversiteId))
                 return BadRequest();
 
-            if (!_context.Universiteler.Any(x => x.Id == fakulte.UniversiteId))
-                return BadRequest();
-
-            _context.Fakulteler.Add(fakulte);
+            Fakulte x = new Fakulte() { UniversiteId = UniversiteId, Ad = FakulteAd };
+            _context.Fakulteler.Add(x);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetFakulte", new { id = fakulte.Id }, fakulte);
+            return CreatedAtAction("GetFakulte", new { id = x.Id }, x);
         }
 
-        private bool FakulteExists(int id)
-        {
-            return _context.Fakulteler.Any(e => e.Id == id);
-        }
     }
 }
