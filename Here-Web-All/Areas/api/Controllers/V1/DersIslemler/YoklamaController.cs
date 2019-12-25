@@ -30,8 +30,8 @@ namespace here_webapi.Controllers.V1.DersIslemleri
                                                                      .Include(x => x.Ders)
                                                                      .Select(x => x.Ders)
                                                                      .ToListAsync();
-
-            AcilanDers ders = await _context.AcilanDersler.FirstOrDefaultAsync(x => x.Key == Key && x.SonGecerlilik >= DateTime.Now && ogrenciDersleri.Select(oD => oD.Id).Contains(x.Id));
+            DateTime now = DateTime.Now;
+            AcilanDers ders = await _context.AcilanDersler.FirstOrDefaultAsync(x => x.Key == Key && x.SonGecerlilik >= now && ogrenciDersleri.Select(oD => oD.Id).Contains(x.Id));
 
             if (ders == null)
                 return BadRequest();

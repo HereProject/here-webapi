@@ -17,7 +17,8 @@
 else
 {
     <center>
-        <h5>Yoklamanızı gerçekleştirmek için lütfen uygulamanızdan QRKodu okutunuz.</h5>
+        <h5>Yoklamanızı gerçekleştirmek için lütfen uygulamanızdan QRKodu okutunuz.</h5><br />
+        <h5>Kalan süre: @string.Format("{0}:{1}",(Model.SonGecerlilik - DateTime.Now).Minutes, (Model.SonGecerlilik - DateTime.Now).Seconds)</h5>
     </center>
     <div style="width:%100;border:1px solid gray;padding: 15px">
         <center>
