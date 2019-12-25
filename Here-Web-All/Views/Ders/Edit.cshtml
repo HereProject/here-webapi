@@ -1,0 +1,101 @@
+﻿@using here_webapi.Models.Identity
+@using here_webapi.Models.Yoklama
+
+@model here_webapi.Models.DersModels.Ders
+
+@{
+    ViewData["Title"] = Model.DersAdi + " Detay";
+    List<AppUser> dersiAlanlar = (List<AppUser>)ViewBag.ders_ogrenciler;
+    List<AppUser> ogrenciler = (List<AppUser>)ViewBag.ogrenciler;
+    List<AcilanDers> yoklamalar = (List<AcilanDers>) ViewBag.yoklamalar;
+    yoklamalar.Reverse();
+}
+
+<h1>Edit</h1>
+
+<h4>@Model.DersAdi</h4>
+<hr />
+
+
+
+<div class="row">
+
+    <div class="col-md-6">
+
+        <h4>Yoklama Başlat</h4>
+        <form method="post" action="/ders/yoklama-ac">
+            <input type="hidden" name="DersId" value="@Model.Id" />
+            <input type="number" placeholder="Yoklama Süresi (Dakika)" min="1" max="60" name="Dakika" class="form-control" /> <br />
+            <input type="submit" value="Başlat" class="form-control" />
+        </form>
+    </div>
+    <div class="col-md-6" style="border-left: 1px solid gray">
+
+        <h4>Derse Öğrenci Ekle</h4>
+        <form method="post" action="/ders/ogrenci-ekle">
+            <input type="hidden" value="@Model.Id" name="dersNo" />
+            <select name="OgrId" class="form-control">
+                @foreach (var item in ogrenciler)
+                {
+                    <option value="@item.Id">@item.OgrenciDetay.Ad @item.OgrenciDetay.Soyad</option>
+                }
+            </select>
+            <br />
+            <input type="submit" value="Ekle" class="form-control" />
+        </form>
+    </div>
+</div>
+<hr />
+
+
+<div class="row">
+    <div class="col-md-12">
+        <h4>Yoklamalar</h4>
+        <table class="table table-bordered">
+            <tr>
+                <td>Yoklama ID</td>
+                <td>Yoklama Bitiş Süresi</td>
+            </tr>
+            @foreach (var item in yoklamalar)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    @if (item.SonGecerlilik < DateTime.Now)
+                    {
+                        <td><a href="@string.Format("/ders/yoklama/{0}", item.Id)"><font color="red">@item.SonGecerlilik</font></a> - Bitti</td>
+                    }
+                    else
+                    {
+                        <td><a href="@string.Format("/ders/yoklama/{0}", item.Id)"><font color="green">@item.SonGecerlilik</font></a> - Aktif</td>
+                    }
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+
+<h4>Dersi alan öğrenciler</h4>
+<table class="table table-bordered">
+    <tr>
+        <td>Id</td>
+        <td>
+            Ad
+        </td>
+        <td>
+            Soyad
+        </td>
+    </tr>
+    @foreach (AppUser item in dersiAlanlar)
+    {
+        <tr>
+            <td>@item.Id</td>
+            <td>
+                @item.OgrenciDetay.Ad
+            </td>
+            <td>
+                @item.OgrenciDetay.Soyad
+            </td>
+        </tr>
+    }
+</table>

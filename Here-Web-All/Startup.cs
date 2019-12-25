@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Here_Web_All
 {
@@ -50,7 +51,10 @@ namespace Here_Web_All
             services.AddIdentity<AppUser, AppRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
-            }).AddDefaultTokenProviders().AddEntityFrameworkStores<AppDbContext>();
+            })
+                .AddDefaultUI(UIFramework.Bootstrap4)
+                .AddDefaultTokenProviders()
+                .AddEntityFrameworkStores<AppDbContext>();
 
             services.AddMvc().AddJsonOptions(opt =>
             {
@@ -68,8 +72,7 @@ namespace Here_Web_All
 
             services.AddAuthentication(options =>
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(x =>
             {

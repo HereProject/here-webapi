@@ -1,0 +1,31 @@
+﻿@model here_webapi.Models.DersModels.Ders
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Yeni Ders Ekle</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <input class="form-control" name="dersadi" type="text" />
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Oluştur" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

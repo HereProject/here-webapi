@@ -1,0 +1,103 @@
+﻿@model here_webapi.Models.Yoklama.AcilanDers
+
+@{
+    ViewData["Title"] = Model.Ders.DersAdi + " Yoklaması";
+    string url = "/ders/yoklama/gelenler";
+}
+
+<h1>@Model.Ders.DersAdi Yoklaması</h1>
+
+
+@if (Model.SonGecerlilik < DateTime.Now)
+{
+    <center>
+        <h5>Yoklama süresi sona erdi. Yoklama durumu aşağıdaki gibidir.</h5>
+    </center>
+}
+else
+{
+    <center>
+        <h5>Yoklamanızı gerçekleştirmek için lütfen uygulamanızdan QRKodu okutunuz.</h5>
+    </center>
+    <div style="width:%100;border:1px solid gray;padding: 15px">
+        <center>
+            <div id="qrcode">
+
+            </div>
+        </center>
+    </div>
+}
+<h5>Yoklama Listesi</h5>
+<div id="gelenler">
+    <table class="table table-bordered" id="yok-liste">
+        <tr><td>Ad</td><td>Soyad</td><td>Durum</td></tr>
+    </table>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery.qrcode/qr.min.js"></script>
+    @if (Model.SonGecerlilik >= DateTime.Now)
+    {
+        <script>
+        $(document).ready(function () {
+            jQuery('#qrcode').qrcode({
+                text: "@Model.Key",
+                width: 500,
+                height: 500
+            });
+            setInterval(SetYoklama,2000);
+        });
+
+        function SetYoklama() {
+            $.ajax({
+            url: "@url",
+            type: "GET",
+            data: {yokId : @Model.Id},
+                success: function (data) {
+                $("#yok-liste").empty();
+                $("#yok-liste").append("<tr><td>Ad</td><td>Soyad</td><td>Durum</td></tr>");
+                $.each(data, function (index, value) {
+                    var durum = value.yoklandi == true ? "<font color=\"green\">Geldi</font>" : "<font color=\"red\">Gelmedi</font>";
+                    $("#yok-liste").append(
+                        "<tr><td>"+value.ogrenci.ogrenciDetay.ad+"</td><td>"+value.ogrenci.ogrenciDetay.soyad+"</td><td>"+durum+"</td></tr>"
+                    );
+                });
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+        }
+        </script>
+    }
+    else
+    {
+        <script>
+        $(document).ready(function () {
+                SetYoklama();
+        });
+
+        function SetYoklama() {
+            $.ajax({
+            url: "@url",
+            type: "GET",
+            data: {yokId : @Model.Id},
+                success: function (data) {
+                $("#yok-liste").empty();
+                $("#yok-liste").append("<tr><td>Ad</td><td>Soyad</td><td>Durum</td></tr>");
+                $.each(data, function (index, value) {
+                    var durum = value.yoklandi == true ? "<font color=\"green\">Geldi</font>" : "<font color=\"red\">Gelmedi</font>";
+                    $("#yok-liste").append(
+                        "<tr><td>"+value.ogrenci.ogrenciDetay.ad+"</td><td>"+value.ogrenci.ogrenciDetay.soyad+"</td><td>"+durum+"</td></tr>"
+                    );
+                });
+            },
+            error: function (err) {
+                console.log(err);
+            }
+        });
+        }
+        </script>
+    }
+
+}

@@ -115,6 +115,11 @@ namespace Here_Web_All.Data
                     .HasForeignKey(rc => rc.RoleId)
                     .IsRequired();
             });
+            modelBuilder.Entity<AppUserRole>(b =>
+            {
+                b.HasOne(e => e.User).WithMany(y => y.UserRoles).HasForeignKey(t => t.UserId);
+                b.HasOne(e => e.Role).WithMany(y => y.UserRoles).HasForeignKey(t => t.RoleId);
+            });
 
             #region tableNames
             modelBuilder.Entity<AppUser>(b =>

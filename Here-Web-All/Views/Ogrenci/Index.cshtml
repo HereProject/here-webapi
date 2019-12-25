@@ -1,0 +1,35 @@
+﻿@model IEnumerable<here_webapi.Models.Identity.AppUser>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Tüm Öğrenciler</h1>
+
+<p>
+    <a asp-action="Create">Öğrenci Ekle</a>
+</p>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Öğrenci ID</th>
+            <th>Öğrenci Ad</th>
+            <th>Öğrenci Soyad</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.OgrenciDetay.Ad)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.OgrenciDetay.Soyad)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
