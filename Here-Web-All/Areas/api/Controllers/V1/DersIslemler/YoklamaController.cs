@@ -12,21 +12,32 @@ using Microsoft.AspNetCore.Authorization;
 using here_webapi.Models.DersModels;
 using here_webapi.Contracts.V1.Responses.DersIslemleri;
 using Here_Web_All.Data;
+using here_webapi.Services;
 
 namespace here_webapi.Controllers.V1.DersIslemleri
 {
     [ApiController]
     public class YoklamaController : HEREController
     {
-        public YoklamaController(AppDbContext context, UserManager<AppUser> userManager) : base(context, userManager)
+        private readonly IdentityService _identityService;
+        public YoklamaController(AppDbContext context, UserManager<AppUser> userManager, IdentityService iSer) : base(context, userManager)
         {
+            _identityService = iSer;
         }
 
         [HttpPost("api/v1/yoklama")]
         [Authorize(Roles = "Öğrenci")]
-        public async Task<ActionResult> BeniYokla(string Key)
+        public async Task<ActionResult> BeniYokla(string Key, string eposta, string sifre)
         {
-            List<Ders> ogrenciDersleri = await _context.AlinanDersler.Where(x => x.OgrenciId == ActiveUserId)
+
+            var log = await _identityService.LoginAsync(eposta, sifre);
+
+            if (!log.Success)
+                return Unauthorized();
+
+            AppUser user = await _userManager.FindByEmailAsync(eposta);
+
+            List<Ders> ogrenciDersleri = await _context.AlinanDersler.Where(x => x.OgrenciId == user.Id)
                                                                      .Include(x => x.Ders)
                                                                      .Select(x => x.Ders)
                                                                      .ToListAsync();
@@ -37,13 +48,13 @@ namespace here_webapi.Controllers.V1.DersIslemleri
                 return BadRequest();
 
             
-            if (await _context.YoklananOgrenciler.FirstOrDefaultAsync(x => x.OgrenciId == ActiveUserId && x.Key == Key) != null)
+            if (await _context.YoklananOgrenciler.FirstOrDefaultAsync(x => x.OgrenciId == user.Id && x.Key == Key) != null)
                 return Ok();
 
             YoklananOgrenci yoklananOgrenci = new YoklananOgrenci()
             {
                 DersId = ders.DersId,
-                OgrenciId = ActiveUserId,
+                OgrenciId = user.Id,
                 Key = Key
             };
 

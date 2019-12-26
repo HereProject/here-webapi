@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Identity;
 using here_webapi.Models.Identity;
 using here_webapi.Models.Yoklama;
 using Here_Web_All.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using here_webapi.Services;
 
 namespace here_webapi.Controllers.V1.DersIslemleri
 {
@@ -22,17 +24,25 @@ namespace here_webapi.Controllers.V1.DersIslemleri
     }
 
     [ApiController]
-    [Authorize]
     public class DersController : HEREController
     {
-        public DersController(AppDbContext context, UserManager<AppUser> userManager): base(context, userManager)
+        private readonly IdentityService _identityService;
+        public DersController(AppDbContext context, UserManager<AppUser> userManager, IdentityService iSer): base(context, userManager)
         {
+            _identityService = iSer;
         }
 
         [HttpGet("api/v1/derslerim")]
-        public async Task<ActionResult<List<DersYoklamaResponse>>> Derslerim()
+        public async Task<ActionResult<List<DersYoklamaResponse>>> Derslerim(string eposta, string sifre)
         {
-            List<Ders> dersler = await _context.AlinanDersler.Where(x => x.OgrenciId == ActiveUserId)
+
+            var res = await _identityService.LoginAsync(eposta, sifre);
+            if (!res.Success)
+                return Unauthorized();
+
+            AppUser user = await _userManager.FindByEmailAsync(eposta);
+
+            List<Ders> dersler = await _context.AlinanDersler.Where(x => x.OgrenciId == user.Id)
                                                              .Include(x => x.Ders)
                                                              .Select(x => x.Ders)
                                                              .ToListAsync();
