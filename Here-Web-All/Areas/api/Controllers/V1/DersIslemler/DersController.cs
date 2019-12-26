@@ -14,6 +14,13 @@ using Here_Web_All.Data;
 
 namespace here_webapi.Controllers.V1.DersIslemleri
 {
+
+    public class DersYoklamaResponse
+    {
+        public Ders ders { get; set; }
+        public AcilanDers yoklama { get; set; }
+    }
+
     [ApiController]
     [Authorize]
     public class DersController : HEREController
@@ -23,14 +30,29 @@ namespace here_webapi.Controllers.V1.DersIslemleri
         }
 
         [HttpGet("api/v1/derslerim")]
-        public async Task<ActionResult<List<Ders>>> Derslerim()
+        public async Task<ActionResult<List<DersYoklamaResponse>>> Derslerim()
         {
             List<Ders> dersler = await _context.AlinanDersler.Where(x => x.OgrenciId == ActiveUserId)
                                                              .Include(x => x.Ders)
                                                              .Select(x => x.Ders)
                                                              .ToListAsync();
+            DateTime now = DateTime.Now;
+            List<AcilanDers> aktifDersler = await _context.AcilanDersler.Where(x => dersler.Select(y => y.Id).Contains(x.DersId) && x.SonGecerlilik >= now).ToListAsync();
 
-            return dersler;
+            List<DersYoklamaResponse> response = new List<DersYoklamaResponse>();
+
+            foreach (Ders item in dersler)
+            {
+                response.Add(
+                    new DersYoklamaResponse()
+                    {
+                        ders = item,
+                        yoklama = aktifDersler.FirstOrDefault(x => x.DersId == item.Id)
+                    }
+                    );
+            }
+            
+            return response;
         }
 
         [HttpPost("api/v1/dersekle")]
