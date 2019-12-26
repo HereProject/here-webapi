@@ -19,8 +19,8 @@ namespace here_webapi.Controllers.V1.DersIslemleri
     [ApiController]
     public class YoklamaController : HEREController
     {
-        private readonly IdentityService _identityService;
-        public YoklamaController(AppDbContext context, UserManager<AppUser> userManager, IdentityService iSer) : base(context, userManager)
+        private readonly IIdentityService _identityService;
+        public YoklamaController(AppDbContext context, UserManager<AppUser> userManager, IIdentityService iSer) : base(context, userManager)
         {
             _identityService = iSer;
         }
