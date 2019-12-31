@@ -22,6 +22,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace Here_Web_All
 {
@@ -34,12 +36,10 @@ namespace Here_Web_All
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<CookiePolicyOptions>(options =>
             {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
@@ -65,29 +65,42 @@ namespace Here_Web_All
 
             services.AddScoped<IIdentityService, IdentityService>();
 
-            JwtSettings jwtSettings = new JwtSettings();
-            Configuration.Bind(nameof(JwtSettings), jwtSettings);
 
-            services.AddSingleton(jwtSettings);
+            //services.AddAuthentication().AddCookie(options => 
+            //{
+            //    options.SlidingExpiration = true;
+            //}).AddJwtBearer(x =>
+            //{
+            //    x.SaveToken = true;
+            //    x.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ValidateIssuerSigningKey = true,
+            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)),
+            //        ValidateIssuer = false,
+            //        ValidateAudience = false,
+            //        RequireExpirationTime = false,
+            //        ValidateLifetime = true
+            //    };
+            //});
 
             services.AddAuthentication(options =>
             {
-                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(x =>
             {
+                x.RequireHttpsMetadata = false;
                 x.SaveToken = true;
                 x.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSettings.Secret)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("cok-gizli-bir-32-karakter-secret")),
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    RequireExpirationTime = false,
+                    RequireExpirationTime = true,
                     ValidateLifetime = true
                 };
             });
-
 
             services.AddSwaggerGen(x =>
             {
@@ -110,7 +123,6 @@ namespace Here_Web_All
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -145,9 +157,10 @@ namespace Here_Web_All
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseCookiePolicy();
-
+            app.UseDefaultFiles();
             app.UseAuthentication();
 
+                
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

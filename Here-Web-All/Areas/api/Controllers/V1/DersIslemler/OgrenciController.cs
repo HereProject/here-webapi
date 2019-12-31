@@ -13,6 +13,7 @@ using here_webapi.Models.Yoklama;
 using Here_Web_All.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using here_webapi.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace here_webapi.Controllers.V1.DersIslemleri
 {
@@ -23,24 +24,20 @@ namespace here_webapi.Controllers.V1.DersIslemleri
         public AcilanDers yoklama { get; set; }
     }
 
-    [ApiController]
-    public class DersController : HEREController
+    public class Ogrenci : HEREController
     {
         private readonly IIdentityService _identityService;
-        public DersController(AppDbContext context, UserManager<AppUser> userManager, IIdentityService iSer): base(context, userManager)
+        public Ogrenci(AppDbContext context, UserManager<AppUser> userManager, IIdentityService iSer): base(context, userManager)
         {
             _identityService = iSer;
         }
 
-        [HttpGet("api/v1/derslerim")]
-        public async Task<ActionResult<List<DersYoklamaResponse>>> Derslerim(string eposta, string sifre)
+        [HttpGet("api/v1/ogrenci/derslerim")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult<List<DersYoklamaResponse>>> Derslerim()
         {
-
-            var res = await _identityService.LoginAsync(eposta, sifre);
-            if (!res.Success)
-                return Unauthorized();
-
-            AppUser user = await _userManager.FindByEmailAsync(eposta);
+            var email = User.Claims.First().Value;
+            AppUser user = await _userManager.FindByEmailAsync(email);
 
             List<Ders> dersler = await _context.AlinanDersler.Where(x => x.OgrenciId == user.Id)
                                                              .Include(x => x.Ders)
@@ -65,6 +62,42 @@ namespace here_webapi.Controllers.V1.DersIslemleri
             return response;
         }
 
+        [HttpPost("api/v1/ogrenci/yoklama")]
+        [Authorize(Roles = "Öğrenci", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<ActionResult> BeniYokla(string Key)
+        {
+            var email = User.Claims.First().Value;
+            AppUser user = await _userManager.FindByEmailAsync(email);
+
+            List<Ders> ogrenciDersleri = await _context.AlinanDersler.Where(x => x.OgrenciId == user.Id)
+                                                                     .Include(x => x.Ders)
+                                                                     .Select(x => x.Ders)
+                                                                     .ToListAsync();
+            DateTime now = DateTime.Now;
+            AcilanDers ders = await _context.AcilanDersler.FirstOrDefaultAsync(x => x.Key == Key && x.SonGecerlilik >= now && ogrenciDersleri.Select(oD => oD.Id).Contains(x.Id));
+
+            if (ders == null)
+                return BadRequest();
+
+
+            if (await _context.YoklananOgrenciler.FirstOrDefaultAsync(x => x.OgrenciId == user.Id && x.Key == Key) != null)
+                return Ok();
+
+            YoklananOgrenci yoklananOgrenci = new YoklananOgrenci()
+            {
+                DersId = ders.DersId,
+                OgrenciId = user.Id,
+                Key = Key
+            };
+
+            _context.YoklananOgrenciler.Add(yoklananOgrenci);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        /*
+        #region FutureFeature
         [HttpPost("api/v1/dersekle")]
         [Authorize(Roles = "Öğretmen")]
         public async Task<ActionResult<Ders>> DersEkle(string DersAdi)
@@ -141,6 +174,7 @@ namespace here_webapi.Controllers.V1.DersIslemleri
 
             return yoklama;
         }
-
+        #endregion
+        */
     }
 }

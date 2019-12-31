@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace here_webapi.Controllers.V1
 {
-    [ApiController]
+
     public class IdentityController : ControllerBase
     {
         private readonly IIdentityService _identityService;

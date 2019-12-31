@@ -18,12 +18,10 @@ namespace here_webapi.Services
     {
         private readonly AppDbContext _context;
         private readonly UserManager<AppUser> _userManager;
-        private readonly JwtSettings _jwtSettings;
-        public IdentityService(AppDbContext context, UserManager<AppUser> userManager, JwtSettings jwtSettings)
+        public IdentityService(AppDbContext context, UserManager<AppUser> userManager)
         {
             _context = context;
             _userManager = userManager;
-            _jwtSettings = jwtSettings;
         }
 
         public async Task<AuthenticationResponse> LoginAsync(string email, string password)
@@ -102,7 +100,7 @@ namespace here_webapi.Services
         private AuthenticationResponse GenerateTokenForUsers(AppUser user)
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            byte[] key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
+            byte[] key = Encoding.ASCII.GetBytes("cok-gizli-bir-32-karakter-secret");
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]
@@ -118,10 +116,26 @@ namespace here_webapi.Services
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
+            var token2 = new JwtSecurityToken
+                        (
+                            claims: new[]
+                            {
+                                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                                new Claim("id", user.Id.ToString()),
+                            },
+                            expires: DateTime.UtcNow.AddHours(2), // 30 gün geçerli olacak
+                            notBefore: DateTime.UtcNow,
+                            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes("cok-gizli-bir-32-karakter-secret")),
+                                    SecurityAlgorithms.HmacSha256)
+                        );
+
             return new AuthenticationResponse
             {
                 Success = true,
-                Token = tokenHandler.WriteToken(token),
+                //Token = tokenHandler.WriteToken(token),
+                Token = new JwtSecurityTokenHandler().WriteToken(token2)
             };
         }
     }

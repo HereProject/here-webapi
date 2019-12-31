@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Here_Web_All.Data;
 using here_webapi.Models.Identity;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 

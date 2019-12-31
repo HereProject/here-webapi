@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace here_webapi.Controllers.V1
 {
-    public class HEREController : ControllerBase
+    public class HEREController : Controller
     {
         protected readonly AppDbContext _context;
         protected readonly UserManager<AppUser> _userManager;

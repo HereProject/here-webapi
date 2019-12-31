@@ -15,7 +15,6 @@ using Here_Web_All.Data;
 namespace here_webapi.Controllers.V1
 {
     [Route("api/[controller]")]
-    [ApiController]
     public class RolesController : ControllerBase
     {
         private readonly AppDbContext _context;
