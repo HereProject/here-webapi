@@ -69,12 +69,11 @@ namespace here_webapi.Controllers.V1.DersIslemleri
             var email = User.Claims.First().Value;
             AppUser user = await _userManager.FindByEmailAsync(email);
 
-            List<Ders> ogrenciDersleri = await _context.AlinanDersler.Where(x => x.OgrenciId == user.Id)
+            List<int> ogrenciDersleri = (await _context.AlinanDersler.Where(x => x.OgrenciId == user.Id)
                                                                      .Include(x => x.Ders)
-                                                                     .Select(x => x.Ders)
-                                                                     .ToListAsync();
+                                                                     .ToListAsync()).Select(x => x.Ders).Select(x => x.Id).ToList();
             DateTime now = DateTime.Now;
-            AcilanDers ders = await _context.AcilanDersler.FirstOrDefaultAsync(x => x.Key == Key && x.SonGecerlilik >= now && ogrenciDersleri.Select(oD => oD.Id).Contains(x.Id));
+            AcilanDers ders = await _context.AcilanDersler.Where(x => x.Key == Key && x.SonGecerlilik >= now && ogrenciDersleri.Contains(x.DersId)).FirstOrDefaultAsync();
 
             if (ders == null)
                 return BadRequest();
