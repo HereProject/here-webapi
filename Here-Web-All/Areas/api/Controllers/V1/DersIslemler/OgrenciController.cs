@@ -48,15 +48,30 @@ namespace here_webapi.Controllers.V1.DersIslemleri
 
             List<DersYoklamaResponse> response = new List<DersYoklamaResponse>();
 
+            DateTime nowDate = DateTime.Now;
             foreach (Ders item in dersler)
             {
-                response.Add(
-                    new DersYoklamaResponse()
-                    {
-                        ders = item,
-                        yoklama = aktifDersler.FirstOrDefault(x => x.DersId == item.Id)
-                    }
+
+                if (_context.YoklananOgrenciler.Any(x => aktifDersler.Select(y => y.Id).Contains(x.Id) && x.OgrenciId == user.Id))
+                {
+                    response.Add(
+                        new DersYoklamaResponse()
+                        {
+                            ders = item,
+                            yoklama = null
+                        }
                     );
+                }
+                else
+                {
+                    response.Add(
+                        new DersYoklamaResponse()
+                        {
+                            ders = item,
+                            yoklama = aktifDersler.FirstOrDefault(x => x.DersId == item.Id)
+                        }
+                    );
+                }
             }
             
             return response;

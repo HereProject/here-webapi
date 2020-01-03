@@ -105,14 +105,19 @@ namespace Here_Web_All.Controllers
         [Route("ders/yoklama-ac")]
         public async Task<IActionResult> YoklamaAc(int DersId, int Dakika)
         {
-            List<int> dersIdler = await _context.Dersler.Where(x => x.OgretmenId == ActiveUserId).Select(x => x.Id).ToListAsync();
+            List<int> dersIdler = (await _context.Dersler.Where(x => x.OgretmenId == ActiveUserId).ToListAsync()).Select(x => x.Id).ToList();
             AcilanDers ders = await _context.AcilanDersler.Where(x => x.DersId == DersId && dersIdler.Contains(x.DersId) && x.SonGecerlilik >= DateTime.Now).FirstOrDefaultAsync();
             
+            
+            Dakika = Math.Abs(Dakika);
+
             if(ders != null)
             {
                 ders.SonGecerlilik.AddMinutes(Dakika);
                 _context.Update(ders);
                 await _context.SaveChangesAsync();
+
+                return RedirectToAction(nameof(Yoklama), new { id = ders.Id });
             }
 
             AcilanDers yoklama = new AcilanDers()
@@ -139,9 +144,9 @@ namespace Here_Web_All.Controllers
             if (yoklama.Ders.OgretmenId != ActiveUserId)
                 return BadRequest();
 
-            List<int> ogrIds = await _context.AlinanDersler.Where(x => x.DersId == yoklama.Ders.Id).Select(x => x.OgrenciId).ToListAsync();
+            List<int> ogrIds = (await _context.AlinanDersler.Where(x => x.DersId == yoklama.Ders.Id).ToListAsync()).Select(x => x.OgrenciId).ToList();
             List<AppUser> dersOgrencileri = await _context.Users.Where(x => ogrIds.Contains(x.Id)).Include(x => x.OgrenciDetay).ToListAsync();
-            List<int> yoklananIdler = await _context.YoklananOgrenciler.Where(x => x.DersId == yoklama.DersId && x.Key == yoklama.Key).Select(x => x.OgrenciId).ToListAsync();
+            List<int> yoklananIdler = (await _context.YoklananOgrenciler.Where(x => x.DersId == yoklama.DersId && x.Key == yoklama.Key).ToListAsync()).Select(x => x.OgrenciId).ToList();
 
 
             List<DersYoklamaBilgisi> dersYoklamaBilgisi = new List<DersYoklamaBilgisi>();
