@@ -63,7 +63,7 @@ namespace here_webapi.Controllers.V1.DersIslemleri
         }
 
         [HttpPost("api/v1/ogrenci/yoklama")]
-        [Authorize(Roles = "Öğrenci", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public async Task<ActionResult> BeniYokla(string Key)
         {
             var email = User.Claims.First().Value;
