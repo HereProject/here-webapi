@@ -30,10 +30,16 @@ else
 }
 <h5>Yoklama Listesi</h5>
 <div id="gelenler">
-    <table class="table table-bordered" id="yok-liste">
-        <tr><td>Ad</td><td>Soyad</td><td>Durum</td></tr>
+    <table class="table table-bordered" id="yoklamatablo gelenler">
+        <tr><td>Ad</td><td>Soyad</td><td>Durum</td><td>İşlem</td></tr>
+    </table>
+    <table class="table table-bordered" id="yoklamatablo gelmeyenler">
+        <tr><td>Ad</td><td>Soyad</td><td>Durum</td><td>İşlem</td></tr>
     </table>
 </div>
+
+
+
 
 @section Scripts {
     <script src="~/lib/jquery.qrcode/qr.min.js"></script>
@@ -55,13 +61,18 @@ else
             type: "GET",
             data: {yokId : @Model.Id},
                 success: function (data) {
-                $("#yok-liste").empty();
-                $("#yok-liste").append("<tr><td>Ad</td><td>Soyad</td><td>Durum</td></tr>");
-                $.each(data, function (index, value) {
-                    var durum = value.yoklandi == true ? "<font color=\"green\">Geldi</font>" : "<font color=\"red\">Gelmedi</font>";
-                    $("#yok-liste").append(
-                        "<tr><td>"+value.ogrenci.ogrenciDetay.ad+"</td><td>"+value.ogrenci.ogrenciDetay.soyad+"</td><td>"+durum+"</td></tr>"
-                    );
+                $(".yoklamatablo").empty();
+                $(".yoklamatablo").append("<tr><td>Ad</td><td>Soyad</td><td>Durum</td><td>İşlem</td></tr>");
+                    $.each(data, function (index, value) {
+                    if (value.yoklandi == true) {
+                        $(".gelenler").append(
+                            "<tr><td>" + value.ogrenci.ogrenciDetay.ad + "</td><td>" + value.ogrenci.ogrenciDetay.soyad + "</td><td><font color=\"green\">Geldi</font></td><td><a href=\"ders/yoklama/ogrenci-durum/"+@Model.Id+"/"+value.ogrenci.id+"/0\" style=\"color:red; cursor:pointer\">Yoklamadan Çıkar</a></td></tr>"
+                        );
+                    } else {
+                        $(".gelmeyenler").append(
+                            "<tr><td>" + value.ogrenci.ogrenciDetay.ad + "</td><td>" + value.ogrenci.ogrenciDetay.soyad + "</td><td><font color=\"red\">Gelmedi</font></td><td><a href=\"ders/yoklama/ogrenci-durum/"+@Model.Id+"/"+value.ogrenci.id+"/1\" style=\"color:green; cursor:pointer\">Yoklamaya Ekle</a></td></tr>"
+                        );
+                    }
                 });
             },
             error: function (err) {

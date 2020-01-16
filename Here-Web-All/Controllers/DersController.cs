@@ -157,5 +157,47 @@ namespace Here_Web_All.Controllers
 
             return Json(dersYoklamaBilgisi);
         }
+
+        [HttpGet]
+        [Route("ders/yoklama/ogrenci-durum/{yoklama}/{ogr_id}/{ekle}")]
+        public async Task<IActionResult> OgrenciEkleCikar(int yoklama, int ogr_id, int ekle)
+        {
+            if (yoklama <= 0 || ogr_id <= 0 || ekle < 0 || ekle > 1)
+                return RedirectToAction("Index", "Home");
+
+            AcilanDers ders = await _context.AcilanDersler.Include(x => x.Ders).FirstOrDefaultAsync(x => x.Id == yoklama);
+            if (ders == null || ders.Ders.OgretmenId != ActiveUserId)
+                return RedirectToAction("Index");
+
+            AppUser ogrenci = await _context.Users.Include(x => x.AlinanDersler).Where(x => x.Id == ogr_id).FirstOrDefaultAsync();
+
+            if(ogrenci == null || !ogrenci.AlinanDersler.Select(x => x.Id).Contains(ders.Id))
+                return RedirectToAction("Index");
+
+            YoklananOgrenci yoklanma = await _context.YoklananOgrenciler.FirstOrDefaultAsync(x => x.OgrenciId == ogr_id && x.Id == yoklama);
+
+            if(yoklanma == null && ekle == 1)
+            {
+                // Öğrenci yoklamaya eklenecek
+                YoklananOgrenci yeni = new YoklananOgrenci()
+                {
+                    DersId = ders.DersId,
+                    Key = ders.Key,
+                    OgrenciId = ogrenci.Id
+                };
+
+                _context.YoklananOgrenciler.Add(yeni);
+                await _context.SaveChangesAsync();
+            }
+            else if(yoklanma != null && ekle == 0)
+            {
+                // Öğrenci yoklamadan çıkarılacak
+                _context.YoklananOgrenciler.Remove(yoklanma);
+                await _context.SaveChangesAsync();
+            }
+
+
+            return RedirectToAction(nameof(Yoklama), new { id = yoklama });
+        }
     }
 }
