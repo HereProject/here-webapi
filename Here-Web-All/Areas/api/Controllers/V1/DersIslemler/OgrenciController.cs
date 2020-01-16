@@ -18,10 +18,16 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 namespace here_webapi.Controllers.V1.DersIslemleri
 {
 
+    public class YoklamaBilgisi
+    {
+        public int toplamYoklama { get; set; }
+        public int toplamKatilim { get; set; }
+    }
     public class DersYoklamaResponse
     {
         public Ders ders { get; set; }
         public AcilanDers yoklama { get; set; }
+        public YoklamaBilgisi katilim { get; set; }
     }
 
     public class Ogrenci : HEREController
@@ -51,27 +57,27 @@ namespace here_webapi.Controllers.V1.DersIslemleri
             DateTime nowDate = DateTime.Now;
             foreach (Ders item in dersler)
             {
-
+                int ToplamYoklamaAdedi = (await _context.AcilanDersler.Where(x => x.DersId == item.Id).ToListAsync()).Count;
+                int ToplamKatilim = (await _context.YoklananOgrenciler.Where(x => x.DersId == item.Id && x.OgrenciId == user.Id).ToListAsync()).Count;
+                DersYoklamaResponse res = null;
                 if (_context.YoklananOgrenciler.Any(x => aktifDersler.Select(y => y.Id).Contains(x.Id) && x.OgrenciId == user.Id))
                 {
-                    response.Add(
-                        new DersYoklamaResponse()
-                        {
-                            ders = item,
-                            yoklama = null
-                        }
-                    );
+                    res = new DersYoklamaResponse()
+                            {
+                                ders = item,
+                                yoklama = null
+                            };
                 }
                 else
                 {
-                    response.Add(
-                        new DersYoklamaResponse()
-                        {
-                            ders = item,
-                            yoklama = aktifDersler.FirstOrDefault(x => x.DersId == item.Id)
-                        }
-                    );
+                    res = new DersYoklamaResponse()
+                    {
+                        ders = item,
+                        yoklama = aktifDersler.FirstOrDefault(x => x.DersId == item.Id)
+                    };
                 }
+                res.katilim = new YoklamaBilgisi() { toplamYoklama = ToplamYoklamaAdedi, toplamKatilim = ToplamKatilim };
+                response.Add(res);
             }
             
             return response;
