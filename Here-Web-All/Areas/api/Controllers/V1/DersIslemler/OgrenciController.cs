@@ -33,7 +33,7 @@ namespace here_webapi.Controllers.V1.DersIslemleri
     public class Ogrenci : HEREController
     {
         private readonly IIdentityService _identityService;
-        public Ogrenci(AppDbContext context, UserManager<AppUser> userManager, IIdentityService iSer) : base(context, userManager)
+        public Ogrenci(AppDbContext context, UserManager<AppUser> userManager, IIdentityService iSer): base(context, userManager)
         {
             _identityService = iSer;
         }
@@ -60,14 +60,14 @@ namespace here_webapi.Controllers.V1.DersIslemleri
                 int ToplamYoklamaAdedi = (await _context.AcilanDersler.Where(x => x.DersId == item.Id).ToListAsync()).Count;
                 int ToplamKatilim = (await _context.YoklananOgrenciler.Where(x => x.DersId == item.Id && x.OgrenciId == user.Id).ToListAsync()).Count;
                 DersYoklamaResponse res = null;
-
+                
                 if (_context.YoklananOgrenciler.Any(x => aktifDersler.Select(y => y.Id).Contains(x.Id) && x.OgrenciId == user.Id))
                 {
                     res = new DersYoklamaResponse()
-                    {
-                        ders = item,
-                        yoklama = null
-                    };
+                            {
+                                ders = item,
+                                yoklama = null
+                            };
                 }
                 else
                 {
@@ -81,7 +81,7 @@ namespace here_webapi.Controllers.V1.DersIslemleri
                 res.katilim = new YoklamaBilgisi() { toplamYoklama = ToplamYoklamaAdedi, toplamKatilim = ToplamKatilim };
                 response.Add(res);
             }
-
+            
             return response;
         }
 
