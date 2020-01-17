@@ -18,7 +18,7 @@ else
 {
     <center>
         <h5>Yoklamanızı gerçekleştirmek için lütfen uygulamanızdan QRKodu okutunuz.</h5><br />
-        <h5>Kalan süre: @string.Format("{0}:{1}",(Model.SonGecerlilik - DateTime.Now).Minutes, (Model.SonGecerlilik - DateTime.Now).Seconds)</h5>
+        <h5>Kalan süre: @string.Format("{0}:{1}", (Model.SonGecerlilik - DateTime.Now).Minutes, (Model.SonGecerlilik - DateTime.Now).Seconds)</h5>
     </center>
     <div style="width:%100;border:1px solid gray;padding: 15px">
         <center>
@@ -31,11 +31,11 @@ else
 <h5>Yoklama Listesi</h5>
 <div id="gelenler">
     <h6>Gelenler</h6>
-    <table class="table table-bordered" id="yoklamatablo gelenler">
+    <table class="table table-bordered gelenler" id="yoklamatablo">
         <tr><td>Ad</td><td>Soyad</td><td>Durum</td><td>İşlem</td></tr>
     </table>
     <h6>Gelmeyenler</h6>
-    <table class="table table-bordered" id="yoklamatablo gelmeyenler">
+    <table class="table table-bordered gelmeyenler" id="yoklamatablo">
         <tr><td>Ad</td><td>Soyad</td><td>Durum</td><td>İşlem</td></tr>
     </table>
 </div>
@@ -58,21 +58,23 @@ else
         });
 
         function SetYoklama() {
+            var yoklamaID = @Model.Id;
             $.ajax({
             url: "@url",
             type: "GET",
-            data: {yokId : @Model.Id},
+            data: {yokId : yoklamaID},
                 success: function (data) {
-                $(".yoklamatablo").empty();
+                $(".yoklamatablo").html("");
                 $(".yoklamatablo").append("<tr><td>Ad</td><td>Soyad</td><td>Durum</td><td>İşlem</td></tr>");
                     $.each(data, function (index, value) {
+                        var url = "http://46.101.226.8/ders/yoklama/ogrencidurum?yoklama="+ yoklamaID
                     if (value.yoklandi == true) {
                         $(".gelenler").append(
-                            "<tr><td>" + value.ogrenci.ogrenciDetay.ad + "</td><td>" + value.ogrenci.ogrenciDetay.soyad + "</td><td><font color=\"green\">Geldi</font></td><td><a href=\"ders/yoklama/ogrenci-durum/"+@Model.Id+"/"+value.ogrenci.id+"/0\" style=\"color:red; cursor:pointer\">Yoklamadan Çıkar</a></td></tr>"
+                            "<tr><td>" + value.ogrenci.ogrenciDetay.ad + "</td><td>" + value.ogrenci.ogrenciDetay.soyad + "</td><td><font color=\"green\">Geldi</font></td><td><a href=\""+url+ "&ogr_id="+ value.ogrenci.id +"&ekle=0\" style=\"color:red; cursor:pointer\">Yoklamadan Çıkar</a></td></tr>"
                         );
                     } else {
                         $(".gelmeyenler").append(
-                            "<tr><td>" + value.ogrenci.ogrenciDetay.ad + "</td><td>" + value.ogrenci.ogrenciDetay.soyad + "</td><td><font color=\"red\">Gelmedi</font></td><td><a href=\"ders/yoklama/ogrenci-durum/"+@Model.Id+"/"+value.ogrenci.id+"/1\" style=\"color:green; cursor:pointer\">Yoklamaya Ekle</a></td></tr>"
+                            "<tr><td>" + value.ogrenci.ogrenciDetay.ad + "</td><td>" + value.ogrenci.ogrenciDetay.soyad + "</td><td><font color=\"red\">Gelmedi</font></td><td><a href=\""+url+ "&ogr_id="+ value.ogrenci.id +"&ekle=1\" style=\"color:green; cursor:pointer\">Yoklamaya Ekle</a></td></tr>"
                         );
                     }
                 });
@@ -91,19 +93,26 @@ else
                 SetYoklama();
         });
 
-        function SetYoklama() {
+            function SetYoklama() {
+            var yoklamaID = @Model.Id;
             $.ajax({
             url: "@url",
             type: "GET",
-            data: {yokId : @Model.Id},
+            data: {yokId : yoklamaID},
                 success: function (data) {
-                $("#yok-liste").empty();
-                $("#yok-liste").append("<tr><td>Ad</td><td>Soyad</td><td>Durum</td></tr>");
-                $.each(data, function (index, value) {
-                    var durum = value.yoklandi == true ? "<font color=\"green\">Geldi</font>" : "<font color=\"red\">Gelmedi</font>";
-                    $("#yok-liste").append(
-                        "<tr><td>"+value.ogrenci.ogrenciDetay.ad+"</td><td>"+value.ogrenci.ogrenciDetay.soyad+"</td><td>"+durum+"</td></tr>"
-                    );
+                $(".yoklamatablo").html("");
+                $(".yoklamatablo").append("<tr><td>Ad</td><td>Soyad</td><td>Durum</td><td>İşlem</td></tr>");
+                    $.each(data, function (index, value) {
+                        var url = "http://46.101.226.8/ders/yoklama/ogrencidurum?yoklama="+ yoklamaID
+                    if (value.yoklandi == true) {
+                        $(".gelenler").append(
+                            "<tr><td>" + value.ogrenci.ogrenciDetay.ad + "</td><td>" + value.ogrenci.ogrenciDetay.soyad + "</td><td><font color=\"green\">Geldi</font></td><td><a href=\""+url+ "&ogr_id="+ value.ogrenci.id +"&ekle=0\" style=\"color:red; cursor:pointer\">Yoklamadan Çıkar</a></td></tr>"
+                        );
+                    } else {
+                        $(".gelmeyenler").append(
+                            "<tr><td>" + value.ogrenci.ogrenciDetay.ad + "</td><td>" + value.ogrenci.ogrenciDetay.soyad + "</td><td><font color=\"red\">Gelmedi</font></td><td><a href=\""+url+ "&ogr_id="+ value.ogrenci.id +"&ekle=1\" style=\"color:green; cursor:pointer\">Yoklamaya Ekle</a></td></tr>"
+                        );
+                    }
                 });
             },
             error: function (err) {

@@ -62,19 +62,19 @@ namespace Here_Web_All.Controllers
             AlinanDers ders2 = await _context.AlinanDersler.FirstOrDefaultAsync(x => x.DersId == dersNo && x.OgrenciId == OgrId);
             if (ders2 != null)
                 return RedirectToAction(nameof(Edit), new { id = dersNo });
-                
+
             _context.AlinanDersler.Add(new AlinanDers() { DersId = dersNo, OgrenciId = OgrId });
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Edit), new { id = dersNo });
         }
-        
+
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> Create(string dersadi)
         {
@@ -107,11 +107,11 @@ namespace Here_Web_All.Controllers
         {
             List<int> dersIdler = (await _context.Dersler.Where(x => x.OgretmenId == ActiveUserId).ToListAsync()).Select(x => x.Id).ToList();
             AcilanDers ders = await _context.AcilanDersler.Where(x => x.DersId == DersId && dersIdler.Contains(x.DersId) && x.SonGecerlilik >= DateTime.Now).FirstOrDefaultAsync();
-            
-            
+
+
             Dakika = Math.Abs(Dakika);
 
-            if(ders != null)
+            if (ders != null)
             {
                 ders.SonGecerlilik.AddMinutes(Dakika);
                 _context.Update(ders);
@@ -129,7 +129,7 @@ namespace Here_Web_All.Controllers
 
             _context.AcilanDersler.Add(yoklama);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Yoklama), new { id = yoklama.Id});
+            return RedirectToAction(nameof(Yoklama), new { id = yoklama.Id });
         }
 
         [HttpGet]
@@ -159,7 +159,7 @@ namespace Here_Web_All.Controllers
         }
 
         [HttpGet]
-        [Route("ders/yoklama/ogrenci-durum/{yoklama}/{ogr_id}/{ekle}")]
+        [Route("ders/yoklama/ogrencidurum")]
         public async Task<IActionResult> OgrenciEkleCikar(int yoklama, int ogr_id, int ekle)
         {
             if (yoklama <= 0 || ogr_id <= 0 || ekle < 0 || ekle > 1)
@@ -170,13 +170,13 @@ namespace Here_Web_All.Controllers
                 return RedirectToAction("Index");
 
             AppUser ogrenci = await _context.Users.Include(x => x.AlinanDersler).Where(x => x.Id == ogr_id).FirstOrDefaultAsync();
-
-            if(ogrenci == null || !ogrenci.AlinanDersler.Select(x => x.Id).Contains(ders.Id))
+            List<int> dersIds = ogrenci.AlinanDersler.Select(x => x.DersId).ToList();
+            if (ogrenci == null || !dersIds.Contains(ders.DersId))
                 return RedirectToAction("Index");
 
             YoklananOgrenci yoklanma = await _context.YoklananOgrenciler.FirstOrDefaultAsync(x => x.OgrenciId == ogr_id && x.Id == yoklama);
 
-            if(yoklanma == null && ekle == 1)
+            if (yoklanma == null && ekle == 1)
             {
                 // Öğrenci yoklamaya eklenecek
                 YoklananOgrenci yeni = new YoklananOgrenci()
@@ -189,7 +189,7 @@ namespace Here_Web_All.Controllers
                 _context.YoklananOgrenciler.Add(yeni);
                 await _context.SaveChangesAsync();
             }
-            else if(yoklanma != null && ekle == 0)
+            else if (yoklanma != null && ekle == 0)
             {
                 // Öğrenci yoklamadan çıkarılacak
                 _context.YoklananOgrenciler.Remove(yoklanma);
