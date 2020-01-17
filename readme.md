@@ -1,5 +1,5 @@
 
-# [HERE! Web API](http://3.15.201.22/swagger/)
+# [HERE! Web API](http://13.95.70.235/swagger/)
 
 ![HereBadge](https://img.shields.io/badge/HERE%20!%20-Web%20API-green.svg)
 
